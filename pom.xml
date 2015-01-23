@@ -5,7 +5,7 @@
 
 	<groupId>cc.protea.foundation.http</groupId>
 	<artifactId>http</artifactId>
-	<version>0.1</version>
+	<version>0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>http</name>
