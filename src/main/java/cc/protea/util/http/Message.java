@@ -55,6 +55,30 @@ public abstract class Message<T extends Message<T>> {
         return this.body;
     }
 
+    public Map<String, List<String>> getHeaders() {
+    	return this.headers;
+    }
+
+    public List<String> getHeaders(final String label) {
+    	if (label == null) {
+    		return null;
+    	}
+    	for (String key : headers.keySet()) {
+    		if (label.equalsIgnoreCase(key)) {
+    			return headers.get(key);
+    		}
+    	}
+    	return null;
+    }
+
+    public String getHeader(final String label) {
+    	List<String> list = getHeaders(label);
+    	if (list == null || list.isEmpty()) {
+    		return null;
+    	}
+    	return list.get(0);
+    }
+
 
     /**
      * Sets the body of the Message.

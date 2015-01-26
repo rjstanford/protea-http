@@ -110,12 +110,32 @@ public class Request extends Message<Request> {
         return writeResource("PUT", this.body);
     }
 
+    public Response headResource() throws IOException {
+        buildQueryString();
+        buildHeaders();
+
+        connection.setDoOutput(true);
+        connection.setRequestMethod("HEAD");
+
+        return readResponse();
+    }
+
     public Response optionsResource() throws IOException {
         buildQueryString();
         buildHeaders();
 
         connection.setDoOutput(true);
         connection.setRequestMethod("OPTIONS");
+
+        return readResponse();
+    }
+
+    public Response traceResource() throws IOException {
+        buildQueryString();
+        buildHeaders();
+
+        connection.setDoOutput(true);
+        connection.setRequestMethod("TRACE");
 
         return readResponse();
     }
