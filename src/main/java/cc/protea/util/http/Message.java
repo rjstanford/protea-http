@@ -30,108 +30,111 @@ import java.util.Map;
  */
 
 /**
- * This class represents an HTTP Message, which could either be a Request or a Response.  Message is an abstract
- * class that contains fields and methods that are common to both types of Messages.
+ * This class represents an HTTP Message, which could either be a Request or a Response. Message is an abstract class that contains fields and methods that are common to both types of Messages.
  *
- * @param <T> A Type that extends Message (either {@link Request} or {@link Response})
+ * @param <T>
+ *            A Type that extends Message (either {@link Request} or {@link Response})
  */
 public abstract class Message<T extends Message<T>> {
-    Map<String, List<String>> headers = new HashMap<String, List<String>>();
-    String body;
+	Map<String, List<String>> headers = new HashMap<String, List<String>>();
+	String body;
 
-    /**
-     * The default constructor is a no-op constructor.
-     */
-    public Message() {
-        // No-arg, No-op constructor
-    }
+	/**
+	 * The default constructor is a no-op constructor.
+	 */
+	public Message() {
+		// No-arg, No-op constructor
+	}
 
-    /**
-     * Returns the Message body (also known as the Entity body).
-     *
-     * @return The body of the HTTP Message.  It will typically be HTML, JSON, or XML.
-     */
-    public String getBody() {
-        return this.body;
-    }
+	/**
+	 * Returns the Message body (also known as the Entity body).
+	 *
+	 * @return The body of the HTTP Message. It will typically be HTML, JSON, or XML.
+	 */
+	public String getBody() {
+		return this.body;
+	}
 
-    public Map<String, List<String>> getHeaders() {
-    	return this.headers;
-    }
+	public Map<String, List<String>> getHeaders() {
+		return this.headers;
+	}
 
-    public List<String> getHeaders(final String label) {
-    	if (label == null) {
-    		return null;
-    	}
-    	for (String key : headers.keySet()) {
-    		if (label.equalsIgnoreCase(key)) {
-    			return headers.get(key);
-    		}
-    	}
-    	return null;
-    }
+	public List<String> getHeaders(final String label) {
+		if (label == null) {
+			return null;
+		}
+		for (String key : headers.keySet()) {
+			if (label.equalsIgnoreCase(key)) {
+				return headers.get(key);
+			}
+		}
+		return null;
+	}
 
-    public String getHeader(final String label) {
-    	List<String> list = getHeaders(label);
-    	if (list == null || list.isEmpty()) {
-    		return null;
-    	}
-    	return list.get(0);
-    }
+	public String getHeader(final String label) {
+		List<String> list = getHeaders(label);
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+		return list.get(0);
+	}
 
+	/**
+	 * Sets the body of the Message.
+	 *
+	 * @param body
+	 *            This is typically the JSON, XML, or Form Parameters being sent to the server.
+	 * @return this Message, to support chained method calls
+	 */
+	@SuppressWarnings("unchecked")
+	public T setBody(final String body) {
+		this.body = body;
+		return (T) this;
+	}
 
-    /**
-     * Sets the body of the Message.
-     *
-     * @param body  This is typically the JSON, XML, or Form Parameters being sent to the server.
-     * @return  this Message, to support chained method calls
-     */
-    @SuppressWarnings("unchecked")
-    public T setBody(final String body) {
-        this.body = body;
-        return (T) this;
-    }
+	/**
+	 * Adds a single header value to the Message.
+	 *
+	 * @param name
+	 *            The header name.
+	 * @param value
+	 *            The header value
+	 * @return this Message, to support chained method calls
+	 */
+	@SuppressWarnings("unchecked")
+	public T addHeader(final String name, final String value) {
+		List<String> values = new ArrayList<String>();
+		values.add(value);
 
-    /**
-     * Adds a single header value to the Message.
-     *
-     * @param name The header name.
-     * @param value The header value
-     * @return this Message, to support chained method calls
-     */
-    @SuppressWarnings("unchecked")
-    public T addHeader(final String name, final String value) {
-        List<String> values = new ArrayList<String>();
-        values.add(value);
+		this.headers.put(name, values);
+		return (T) this;
+	}
 
-        this.headers.put(name, values);
-        return (T) this;
-    }
+	/**
+	 * Removes the specified header.
+	 *
+	 * @param name
+	 *            The name of the header to remove.
+	 * @return this Message, to support chained method calls
+	 */
+	@SuppressWarnings("unchecked")
+	public T removeHeader(final String name) {
+		this.headers.remove(name);
+		return (T) this;
+	}
 
-    /**
-     * Removes the specified header.
-     *
-     * @param name The name of the header to remove.
-     * @return this Message, to support chained method calls
-     */
-    @SuppressWarnings("unchecked")
-    public T removeHeader(final String name) {
-        this.headers.remove(name);
-        return (T) this;
-    }
-
-    /**
-     * Sets all of the headers in one call.
-     *
-     * @param headers A Map of headers, where the header name is a String, and the value is a List of one or more
-     *                values.
-     * @return this Message, to support chained method calls
-     */
-    @SuppressWarnings("unchecked")
-    public T setHeaders(final Map<String, List<String>> headers) {
-        this.headers = headers;
-        return (T) this;
-    }
+	/**
+	 * Sets all of the headers in one call.
+	 *
+	 * @param headers
+	 *            A Map of headers, where the header name is a String, and the value is a List of one or more values.
+	 * @return this Message, to support chained method calls
+	 */
+	@SuppressWarnings("unchecked")
+	public T setHeaders(final Map<String, List<String>> headers) {
+		this.headers = headers;
+		return (T) this;
+	}
 
 	String encode(final String in) {
 		try {
