@@ -1,9 +1,11 @@
 package cc.protea.util.http;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -101,6 +103,22 @@ public class Request extends Message<Request> {
 		connection.setRequestMethod("GET");
 
 		return readResponse();
+	}
+
+	/**
+	 * Issues a GET to the server.
+	 *
+	 * @return The {@link Response} from the server
+	 * @throws IOException
+	 */
+	public BinaryResponse getBinaryResource() throws IOException {
+		buildQueryString();
+		buildHeaders();
+
+		connection.setDoOutput(true);
+		connection.setRequestMethod("GET");
+
+		return readBinaryResponse();
 	}
 
 	/**
@@ -210,6 +228,49 @@ public class Request extends Message<Request> {
 			response.setBody(getStringFromStream(connection.getErrorStream()));
 		}
 		return response;
+	}
+
+	/**
+	 * A private method that handles reading the Responses from the server.
+	 *
+	 * @return a {@link Response} from the server.
+	 * @throws IOException
+	 */
+	private BinaryResponse readBinaryResponse() throws IOException {
+		BinaryResponse response = new BinaryResponse();
+		response.setResponseCode(connection.getResponseCode());
+		response.setResponseMessage(connection.getResponseMessage());
+		response.setHeaders(connection.getHeaderFields());
+		try {
+			response.setBinaryBody(getBinaryFromStream(connection.getInputStream()));
+		} catch (IOException e) {
+			response.setBinaryBody(getBinaryFromStream(connection.getErrorStream()));
+		}
+		return response;
+	}
+
+	private byte[] getBinaryFromStream(final InputStream is) {
+		if (is == null) {
+			return null;
+		}
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		try {
+		    byte[] buffer = new byte[0xFFFF];
+		    for (int len = is.read(buffer); len != -1; len = is.read(buffer)) {    
+		        os.write(buffer, 0, len);
+		    }
+		    return os.toByteArray();	    
+		} catch (IOException e) {
+			return null;
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					// no-op
+				}
+			}
+		}
 	}
 
 	private String getStringFromStream(final InputStream is) {
