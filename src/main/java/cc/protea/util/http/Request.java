@@ -5,14 +5,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /*
 
@@ -60,7 +64,6 @@ public class Request extends Message<Request> {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	/**
@@ -171,6 +174,8 @@ public class Request extends Message<Request> {
 		return writeResource("POST", this.body);
 	}
 
+
+
 	/**
 	 * Issues a DELETE to the server.
 	 *
@@ -183,6 +188,22 @@ public class Request extends Message<Request> {
 
 		connection.setDoOutput(true);
 		connection.setRequestMethod("DELETE");
+
+		return readResponse();
+	}
+
+	/**
+	 * Issues a PURGE to the server.
+	 *
+	 * @return The {@link Response} from the server
+	 * @throws IOException
+	 */
+	public Response purgeResource() throws IOException {
+		buildQueryString();
+		buildHeaders();
+
+		connection.setDoOutput(true);
+		connection.setRequestMethod("PURGE");
 
 		return readResponse();
 	}
@@ -362,5 +383,32 @@ public class Request extends Message<Request> {
 
 		return this;
 	}
+	
+    static {
+        allowMethods("PURGE");
+    }
+
+    private static void allowMethods(String... methods) {
+        try {
+            Field methodsField = HttpURLConnection.class.getDeclaredField("methods");
+
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(methodsField, methodsField.getModifiers() & ~Modifier.FINAL);
+
+            methodsField.setAccessible(true);
+
+            String[] oldMethods = (String[]) methodsField.get(null);
+            Set<String> methodsSet = new LinkedHashSet<String>(Arrays.asList(oldMethods));
+            methodsSet.addAll(Arrays.asList(methods));
+            String[] newMethods = methodsSet.toArray(new String[0]);
+
+            methodsField.set(null/*static field*/, newMethods);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
 }
