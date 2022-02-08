@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +62,25 @@ public class Request extends Message<Request> {
 		try {
 			this.url = new URL(url);
 			this.connection = (HttpURLConnection) this.url.openConnection();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * The Constructor takes the url as a String and a proxy as a Proxy.
+	 *
+	 * @param url
+	 *            The url parameter does not need the query string parameters if they are going to be supplied via calls to
+	 *            {@link #addQueryParameter(String, String)}. You can, however, supply the query parameters in the URL if you wish.
+	 * @param proxy
+	 *			  The Connection's Proxy value	
+	 *
+	 */
+	public Request(final String url, final Proxy proxy) {
+		try {
+			this.url = new URL(url);
+			this.connection = (HttpURLConnection) this.url.openConnection(proxy);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
